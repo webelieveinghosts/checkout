@@ -74,7 +74,7 @@ export const OrderSummary = () => {
     }
 
     return (
-        <div className="flex flex-col justify-between p-4 rounded bg-gray-50" style={{ maxHeight: "471px" }}>
+        <div className="flex flex-col justify-between p-4 rounded bg-gray-50 h-full md:max-h-[471px]">
             <div className="">
                 <p className="text-base font-semibold">Suas compras</p>
 
@@ -136,14 +136,14 @@ export const OrderSummary = () => {
 
                 <div className="mt-5 flex flex-col">
                     <p className="font-semibold">Opções de Pagamento</p>
-                    <form className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 h-12">
-                        <div className={cn("flex items-center cursor-pointer select-none rounded bg-gray-100 border px-4 transition-all duration-500 hover:bg-gray-200", {
+                    <form className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:h-12">
+                        <div className={cn("flex items-center cursor-pointer select-none rounded bg-gray-100 border px-4 transition-all duration-500 hover:bg-gray-200 h-12", {
                             "border-primary": paymentMethod === "pix",
                             "border-transparent": paymentMethod !== "pix",
                         })} onClick={() => setPaymentMethod("pix")}>
                             <span className="font-semibold">Pix</span>
                         </div>
-                        <div className={cn("flex items-center cursor-pointer select-none rounded bg-gray-100 border px-4 transition-all duration-500 hover:bg-gray-200", {
+                        <div className={cn("flex items-center cursor-pointer select-none rounded bg-gray-100 border px-4 transition-all duration-500 hover:bg-gray-200 h-12", {
                             "border-primary": paymentMethod === "creditcard",
                             "border-transparent": paymentMethod !== "creditcard",
                         })} onClick={() => setPaymentMethod("creditcard")}>

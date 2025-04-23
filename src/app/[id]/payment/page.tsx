@@ -42,7 +42,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
                                 <h1 className="text-start align-top font-bold text-base">Escaneie o QR Code para efetuar o pagamento.</h1>
                                 <div className="flex w-full mt-2">
                                     <input type="text" defaultValue={paymentData.copyAndPaste} className="w-full h-10 bg-gray-200 rounded-l px-2 outline-none" readOnly />
-                                    <button className="bg-primary w-20 h-10 text-white text-xs font-semibold uppercase rounded-r">copiar</button>
+                                    <button className="bg-primary w-20 h-10 text-white text-xs font-semibold uppercase rounded-r" onClick={() => navigator.clipboard.writeText(paymentData.copyAndPaste ?? "")}>copiar</button>
                                 </div>
                             </div>}
 

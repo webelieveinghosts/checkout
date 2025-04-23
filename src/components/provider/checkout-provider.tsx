@@ -26,7 +26,6 @@ export const useCheckout = () => {
     if (!context) throw new Error("useCheckout must be used within a CheckoutProvider")
 
     const { items, deliveryOption, setDeliveryOption } = context
-    console.log(items)
 
     return useMemo(
         () => ({
