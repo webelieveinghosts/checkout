@@ -63,7 +63,6 @@ export const OrderSummary = () => {
                 return alert("Os dados de entrega estão fora do padrão ou não foram preenchidos corretamente.")
             }
 
-            const cartId = id!.toString()
             const data = delivery === 0 ? {} : { delivery, zipcode, number, address, complement, neighborhood, city, state }
             const value = delivery === 0 ? total : total + (await getDeliveryPrice(items, zipcode, delivery))
 
