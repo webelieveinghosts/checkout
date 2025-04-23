@@ -1,4 +1,3 @@
-import { ReactNode } from "react"
 import { redirect } from "next/navigation"
 import { getPaymentById } from "@/supabase/admin"
 import { Navbar } from "@/components/navbar/navbar"
@@ -12,7 +11,7 @@ const formatter = new Intl.NumberFormat(undefined, {
     currencyDisplay: "narrowSymbol"
 })
 
-export default async function PaymentPage({ params }: { children: ReactNode, params: { id: string } }) {
+export default async function PaymentPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const payment = await getPaymentById(id)
 
