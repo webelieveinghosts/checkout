@@ -12,7 +12,7 @@ const formatter = new Intl.NumberFormat(undefined, {
     currencyDisplay: "narrowSymbol"
 })
 
-export default async function PaymentPage({ params }: { children: ReactNode, params: Promise<{ id: string }> }) {
+export default async function PaymentPage({ params }: { children: ReactNode, params: { id: string } }) {
     const { id } = await params
     const payment = await getPaymentById(id)
 
