@@ -18,7 +18,10 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
     if (!payment || payment.status !== "pending")
         return redirect("https://www.webelieveinghosts.com.br/")
 
-    const paymentData = payment.method === "pix" && await createPayment(payment)
+    let paymentData
+    try {
+        paymentData = payment.method === "pix" && await createPayment(payment)
+    } catch (ignored) {}
 
     const total = (payment.cart as CartItem[]).reduce((sum, { price }) => sum + price, 0)
 
