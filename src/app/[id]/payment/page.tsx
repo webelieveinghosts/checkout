@@ -4,6 +4,7 @@ import { Navbar } from "@/components/navbar/navbar"
 import { createPayment } from "@/mercadopago/payment"
 import { CartItem } from "@/supabase/client"
 import { Payment } from "@/components/payment/payment"
+import { Clipboard } from "@/components/payment/clipboard"
 
 const formatter = new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -18,10 +19,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
     if (!payment || payment.status !== "pending")
         return redirect("https://www.webelieveinghosts.com.br/")
 
-    let paymentData
-    try {
-        paymentData = payment.method === "pix" && await createPayment(payment)
-    } catch (ignored) {}
+    const paymentData = payment.method === "pix" && await createPayment(payment)
 
     const total = (payment.cart as CartItem[]).reduce((sum, { price }) => sum + price, 0)
 
@@ -45,7 +43,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
                                 <h1 className="text-start align-top font-bold text-base">Escaneie o QR Code para efetuar o pagamento.</h1>
                                 <div className="flex w-full mt-2">
                                     <input type="text" defaultValue={paymentData.copyAndPaste} className="w-full h-10 bg-gray-200 rounded-l px-2 outline-none" readOnly />
-                                    <button className="bg-primary w-20 h-10 text-white text-xs font-semibold uppercase rounded-r" onClick={() => navigator.clipboard.writeText(paymentData.copyAndPaste ?? "")}>copiar</button>
+                                    <Clipboard value={paymentData.copyAndPaste ?? ""} />
                                 </div>
                             </div>}
 
