@@ -26,11 +26,11 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
     return (
         <>
             <Navbar action="payment" />
-            <div className="flex justify-center w-full h-full">
+            <div className="flex justify-center w-full h-full px-2 md:px-0 overflow-y-auto">
                 <div className="max-w-5xl mt-4 md:mt-10">
                     <h2 className="text-2xl font-bold">Pagamento via {payment.method === "pix" ? "Pix" : "Cartão de Crédito"}</h2>
 
-                    <div className=" mt-4 flex flex-col gap-4 md:flex-row md:items-start md:gap-6 bg-gray-100 rounded p-3">
+                    <div className="mt-4 flex flex-col items-center gap-4 md:flex-row md:items-start md:gap-6 bg-gray-100 rounded p-3">
                         {payment.method === "pix" && paymentData ?
                             <picture className="container w-80 h-80" >
                                 <img className="rounded bg-white" src={`data:image/jpeg;charset=utf-8;base64,${paymentData.image}`} alt="QR Code" />
@@ -38,7 +38,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
                             <Payment payment={payment} />
                         }
 
-                        <div className="flex flex-col justify-between items-start h-80">
+                        <div className="flex flex-col md:justify-between items-start h-80">
                             {payment.method === "pix" && paymentData && <div className="mb-4">
                                 <h1 className="text-start align-top font-bold text-base">Escaneie o QR Code para efetuar o pagamento.</h1>
                                 <div className="flex w-full mt-2">
@@ -47,7 +47,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
                                 </div>
                             </div>}
 
-                            <div className="sm:mt-8 lg:mt-0 w-full mt-auto">
+                            <div className="mt-2 lg:mt-0 w-full md:mt-auto">
                                 <div className="space-y-4 rounded bg-gray-200 p-4 w-full">
                                     <div className="space-y-2">
                                         <dl className="flex items-center justify-between gap-4">
