@@ -3,11 +3,12 @@
 import { Database } from "@/supabase/database"
 import { useState } from "react"
 import { useCheckout } from "@/components/provider/checkout-provider"
-import { createPaymentCart } from "@/supabase/admin"
+import { createPaymentCart, getCoupon } from "@/supabase/admin"
 import { redirect, useParams } from "next/navigation"
 import LoadingDots from "@/components/loading-dots/loading-dots"
 import { getDeliveryPrice } from "@/melhorenvio/delivery"
 import cn from "clsx"
+import { TicketIcon } from "lucide-react"
 
 const parse = (size: Database["public"]["Enums"]["size"]) => {
     switch (size) {
@@ -37,6 +38,7 @@ export const OrderSummary = () => {
     const [paymentMethod, setPaymentMethod] = useState<"pix" | "creditcard">("pix")
     const [isSubmitting, setSubmitting] = useState(false)
 
+    const coupon = context.getCoupon()
     const delivery = context.getDeliveryOption()
     const items = context.getItems(), total = context.getTotal()
 
@@ -58,13 +60,13 @@ export const OrderSummary = () => {
                 city = (document.getElementById("city") as HTMLInputElement).value,
                 state = (document.getElementById("state") as HTMLInputElement).value
 
-            if (delivery > 0 && (zipcode.length != 8 || address.length < 10 || neighborhood.length < 6 || city.length < 5 || state.length != 2)) {
+            if (delivery && (zipcode.length != 8 || address.length < 10 || neighborhood.length < 6 || city.length < 5 || state.length != 2)) {
                 setSubmitting(false)
                 return alert("Os dados de entrega estão fora do padrão ou não foram preenchidos corretamente.")
             }
 
-            const data = delivery === 0 ? {} : { delivery, zipcode, number, address, complement, neighborhood, city, state }
-            const value = delivery === 0 ? total : total + (await getDeliveryPrice(items, zipcode, delivery))
+            const data = delivery ? { delivery, zipcode, number, address, complement, neighborhood, city, state } : {}
+            const value = total + (delivery?.value ?? 0) - Math.floor(coupon ? (total/100 * coupon.discount) : 0)
 
             const paymentId = await createPaymentCart(items, data, { name, cpf, email, phone }, value, paymentMethod)
             redirect(`/${paymentId}/payment`)
@@ -73,8 +75,21 @@ export const OrderSummary = () => {
         setSubmitting(false)
     }
 
+    const handleApplyCoupon = async () => {
+        setSubmitting(true)
+        const name = (document.getElementById("coupon") as HTMLInputElement).value
+        if (name.length <= 0) return setSubmitting(false)
+        
+        const coupon = await getCoupon(name)
+        if (!coupon) return setSubmitting(false)
+
+        context.setCoupon(coupon)
+
+        setSubmitting(false)
+    }
+
     return (
-        <div className="flex flex-col justify-between p-4 rounded bg-gray-50 h-full md:max-h-[471px]">
+        <div className="flex flex-col justify-between p-4 rounded bg-gray-50 h-full md:min-h-[471px]">
             <div className="">
                 <p className="text-base font-semibold">Suas compras</p>
 
@@ -118,20 +133,37 @@ export const OrderSummary = () => {
             </div>
 
             <div>
+                <div className="border-t border-gray-300 py-2 my-2 w-full">
+                    <label form="coupon" className="mb-1 block text-xs font-semibold uppercase">Tem um cupom?</label>
+                    <div className="flex items-center space-x-2">
+                        <div className="relative w-full">
+                            <input type="text" id="coupon" name="coupon" className="w-full rounded bg-gray-100 border border-gray-200 px-4 h-10 pl-10 text-sm outline-none transition-all duration-500 focus:z-10 focus:border-primary focus:ring-primary" placeholder="WBG20OFF" />
+                            <div className="pointer-events-none absolute inset-y-0 left-0 inline-flex items-center px-3">
+                                <TicketIcon className="h-4 w-4 text-gray-400" />
+                            </div>
+                        </div>
+
+                        <button className="w-40 h-10 rounded bg-primary px-6 text-xs font-semibold uppercase text-white cursor-pointer transition-all duration-500 hover:bg-primary-hover disabled:bg-primary-hover" onClick={handleApplyCoupon} disabled={isSubmitting}>{isSubmitting ? <LoadingDots /> : "Aplicar"}</button>
+                    </div>
+                </div>
                 <div className="border-t border-b border-gray-300 py-2">
                     <div className="flex items-center justify-between">
                         <p className="text-sm font-medium">Valor total</p>
                         <p id="total-items" className="font-semibold">{formatter.format(total)}</p>
                     </div>
                     <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">Desconto</p>
+                        <p id="discount" className="font-semibold">{coupon ? formatter.format(Math.floor(total/100 * coupon.discount)) : "R$ 0,00"}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
                         <p className="text-sm font-medium">Frete</p>
-                        <p id="delivery-fee" className="font-semibold">R$ 0,00</p>
+                        <p id="delivery-fee" className="font-semibold">{delivery ? formatter.format(delivery.value) : "R$ 0,00"}</p>
                     </div>
                 </div>
 
                 <div className="mt-6 flex items-center justify-between">
                     <p className="text-sm font-medium">Total</p>
-                    <p id="total-value" className="text-2xl font-semibold">{formatter.format(total)}</p>
+                    <p id="total-value" className="text-2xl font-semibold">{formatter.format(total + (delivery?.value ?? 0) - Math.floor(coupon ? (total/100 * coupon.discount) : 0))}</p>
                 </div>
 
                 <div className="mt-5 flex flex-col">

@@ -59,14 +59,8 @@ export const DeliveryDetailds = ({ show, close, items, handleDelivery }: { show:
 
     useEffect(() => {
         if (selected) {
-            setDeliveryOption(selected.id)
+            setDeliveryOption({ id: selected.id, value: Number(selected.price) - Number(selected.discount) })
             handleDelivery(selected.name, selected.delivery_time)
-
-            const itemsTotal = Number(document.getElementById("total-items")!.innerHTML.replace("R$", ""))
-            const deliveryFee = Number(selected.price) - Number(selected.discount)
-
-            document.getElementById("delivery-fee")!.innerHTML = formatter.format(deliveryFee)
-            document.getElementById("total-value")!.innerHTML = formatter.format(itemsTotal + deliveryFee)
         }
         else
             handleDelivery()

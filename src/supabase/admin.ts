@@ -16,6 +16,11 @@ export const getPaymentById = async (id: string) => {
     return data
 }
 
+export const getCoupon = async (name: string) => {
+    const { data } = await supabase.from("coupons").select("*").eq("name", name).maybeSingle()
+    return data
+}
+
 export const createPaymentCart = async (cart: CartItem[], delivery: any, summary: any, total: number, method: "pix" | "creditcard") => {
     const { data } = await supabase.from("transactions").insert({
         cart,
@@ -31,5 +36,10 @@ export const createPaymentCart = async (cart: CartItem[], delivery: any, summary
 
 export const updatePayment = async (id: string, payment_id: string) => {
     const { error } = await supabase.from("transactions").update({ payment_id }).eq("id", id)
+    return error ? false : true
+}
+
+export const successPayment = async (payment_id: string) => {
+    const { error } = await supabase.from("transactions").update({ status: "paid" }).eq("payment_id", payment_id)
     return error ? false : true
 }

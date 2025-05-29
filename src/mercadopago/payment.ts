@@ -30,7 +30,7 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
                 },
                 email,
             },
-            callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/callback`,
+            callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/success`,
             notification_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/notification`,
             statement_descriptor: "WBG",
             token: cardFormData?.token
@@ -40,3 +40,5 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
     if (!payment.payment_id) await updatePayment(payment.id, id!.toString())
     return payment.method === "pix" ? { copyAndPaste: point_of_interaction!.transaction_data!.qr_code, image: point_of_interaction!.transaction_data!.qr_code_base64 } : {  }
 }
+
+export const getPaymentById = async (id: string) => new Payment(client).get({ id })

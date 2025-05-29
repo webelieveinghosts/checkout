@@ -73,6 +73,30 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          created_at: string
+          discount: number
+          expires: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          discount: number
+          expires?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          discount?: number
+          expires?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: number

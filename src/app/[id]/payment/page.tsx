@@ -5,6 +5,7 @@ import { createPayment } from "@/mercadopago/payment"
 import { CartItem } from "@/supabase/client"
 import { Payment } from "@/components/payment/payment"
 import { Clipboard } from "@/components/payment/clipboard"
+import { Notify } from "@/components/payment/notify"
 
 const formatter = new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -71,6 +72,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
                     </div>
                 </div>
             </div>
+            <Notify id={payment.id} />
         </>
     )
 }

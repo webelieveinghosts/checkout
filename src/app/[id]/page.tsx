@@ -10,7 +10,7 @@ export default async function Home({ params }: { params: Promise<{ id: string }>
     const { id } = await params
     const cart = await getCart(id)
 
-    if (!cart)
+    if (!cart || cart.length === 0)
         return redirect("https://www.webelieveinghosts.com.br/")
 
     return (
