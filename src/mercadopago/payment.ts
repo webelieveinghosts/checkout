@@ -31,7 +31,7 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
                 email,
             },
             callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/success`,
-            notification_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/notification`,
+            notification_url: "https://checkout.webelieveinghosts.com.br/notification",
             statement_descriptor: "WBG",
             token: cardFormData?.token
         }

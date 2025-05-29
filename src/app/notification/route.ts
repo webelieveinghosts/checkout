@@ -10,5 +10,5 @@ export async function POST(req: NextRequest) {
     if (!info || info.status != "approved") return NextResponse.json({ message: "No valid payment id." }, { status: 500 })
 
     await successPayment(searchParams.get("id")!)
-    return Response.json({ message: "approved" })
+    return Response.json({ message: "approved" }, { status: 200 })
 }
