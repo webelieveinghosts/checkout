@@ -6,6 +6,7 @@ import { CartItem } from "@/supabase/client"
 import { Payment } from "@/components/payment/payment"
 import { Clipboard } from "@/components/payment/clipboard"
 import { Notify } from "@/components/payment/notify"
+import { getDeliveryPrice } from "@/melhorenvio/delivery"
 
 const formatter = new Intl.NumberFormat(undefined, {
     style: "currency",
@@ -23,6 +24,9 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
     const paymentData = payment.method === "pix" && await createPayment(payment)
 
     const total = (payment.cart as CartItem[]).reduce((sum, { price }) => sum + price, 0)
+
+    const delivery_information = payment.delivery_information as any
+    const delivery = Number(delivery_information?.delivery?.value ?? 0)
 
     return (
         <>
@@ -57,8 +61,13 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
                                         </dl>
 
                                         <dl className="flex items-center justify-between gap-4">
+                                            <dt className="text-base font-normal">Desconto</dt>
+                                            <dd className="text-base font-medium">{formatter.format(payment.total - total - delivery)}</dd>
+                                        </dl>
+
+                                        <dl className="flex items-center justify-between gap-4">
                                             <dt className="text-base font-normal">Entrega</dt>
-                                            <dd className="text-base font-medium">{formatter.format(payment.total - total)}</dd>
+                                            <dd className="text-base font-medium">{formatter.format(delivery)}</dd>
                                         </dl>
                                     </div>
 
