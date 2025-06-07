@@ -41,4 +41,10 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
     return payment.method === "pix" ? { copyAndPaste: point_of_interaction!.transaction_data!.qr_code, image: point_of_interaction!.transaction_data!.qr_code_base64 } : {  }
 }
 
-export const getPaymentById = async (id: string) => new Payment(client).get({ id })
+export const getPaymentById = async (id: string) => {
+    try {
+        return new Payment(client).get({ id })
+    } catch (ignored) {
+        return undefined
+    }
+}
