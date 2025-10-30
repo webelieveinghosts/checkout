@@ -12,16 +12,16 @@ initMercadoPago("APP_USR-363935cd-0e0c-4b75-a0c9-a5cc6a9d2646", {
 
 export const Payment = ({ payment }: { payment: Database["public"]["Tables"]["transactions"]["Row"] }) => {
     const handleCardSubmit = async (cardFormData: ICardPaymentFormData<ICardPaymentBrickPayer>) => {
-        const paymentData = await createPayment(payment)
+        const paymentData = await createPayment(payment, cardFormData)
     }
 
-    const { email, cpf } = payment.summary_information as any 
+    const { email, cpf } = payment.summary_information as any
     return (<CardPayment initialization={{ amount: payment.total, payer: { email, identification: {
         type: "CPF",
         number: cpf
-    }} }} customization={{
+    } } }} customization={{
         paymentMethods: {
-            maxInstallments: 12
+            maxInstallments: 3
         }
-    }} onSubmit={handleCardSubmit} onError={(error) => console.error("Error rendering CardPayment:", error)} />)
+    }} onSubmit={handleCardSubmit} onError={(error) => console.error("Error: rendering CardPayment:", error)} />)
 }
