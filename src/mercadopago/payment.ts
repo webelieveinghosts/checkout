@@ -15,11 +15,13 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
     
     const invoice = new Payment(client)
     
+    // ✅ CORREÇÃO: Verificar se é PIX primeiro
+    const isPix = payment.method === "pix"
+    
     // Preparar body base
     const paymentBody: any = {
       transaction_amount: payment.total,
       description: "Pagamento WBG.",
-      payment_method_id: payment.method === "pix" ? "pix" : cardFormData?.payment_method_id,
       payer: {
         first_name: fullName[0],
         last_name: name.replace(`${fullName[0]} `, ""),
@@ -38,9 +40,27 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
       statement_descriptor: "WBG",
     }
     
-    // ✅ CORREÇÃO: Se for pagamento com cartão, adicionar informações adicionais
-    if (payment.method !== "pix" && cardFormData) {
-      // Adicionar token e issuer_id (OBRIGATÓRIOS para cartão)
+    // ✅ Se for PIX
+    if (isPix ) {
+      paymentBody.payment_method_id = "pix"
+    } 
+    // ✅ Se for cartão
+    else if (cardFormData) {
+      // Validar se cardFormData tem as propriedades necessárias
+      if (!cardFormData.token) {
+        throw new Error("Token do cartão não encontrado")
+      }
+      
+      if (!cardFormData.payment_method_id) {
+        throw new Error("Método de pagamento não encontrado")
+      }
+      
+      if (!cardFormData.issuer_id) {
+        throw new Error("Issuer ID não encontrado")
+      }
+      
+      // Adicionar informações do cartão
+      paymentBody.payment_method_id = cardFormData.payment_method_id
       paymentBody.token = cardFormData.token
       paymentBody.issuer_id = cardFormData.issuer_id
       
@@ -55,6 +75,8 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
           ...cardFormData.payer
         }
       }
+    } else {
+      throw new Error("Dados de pagamento incompletos")
     }
     
     const { id, point_of_interaction } = await (payment.payment_id ?
@@ -63,7 +85,7 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
     
     if (!payment.payment_id) await updatePayment(payment.id, id!.toString())
     
-    return payment.method === "pix" ? {
+    return isPix ? {
       copyAndPaste: point_of_interaction!.transaction_data!.qr_code,
       image: point_of_interaction!.transaction_data!.qr_code_base64
     } : undefined
