@@ -21,6 +21,8 @@ export const createPayment = async (
     if (!name || !cpf || !email)
       throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
 
+    
+
     // separar first_name e last_name
     const fullName = name.split(" ")
     const first_name = fullName[0]
@@ -82,6 +84,15 @@ export const createPayment = async (
         : invoice.create({ body: paymentBody })
     )
 
+    // ✅ Log do pagamento criado/recuperado
+    console.log("✅ Payment created/retrieved:", {
+      payment_id: id,
+      method: payment.method,
+      total: payment.total,
+      payer: paymentBody.payer,
+      point_of_interaction
+    })
+
     if (!payment.payment_id) await updatePayment(payment.id, id!.toString())
 
     return isPix
@@ -100,7 +111,12 @@ export const createPayment = async (
 export const getPaymentById = async (paymentId: string) => {
   try {
     const invoice = new Payment(client)
-    return await invoice.get({ id: paymentId })
+    const result = await invoice.get({ id: paymentId })
+
+    // ✅ Log do pagamento buscado
+    console.log("✅ Payment retrieved by ID:", result)
+
+    return result
   } catch (error) {
     console.error("Erro ao buscar pagamento:", error)
     throw error
