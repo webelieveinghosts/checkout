@@ -35,13 +35,13 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
         },
         email,
       },
-      callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/success`,
-      notification_url: "https://checkout.webelieveinghosts.com.br/notification",
+      callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/callback`,
+      notification_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/notification`,
       statement_descriptor: "WBG",
     }
     
     // ✅ Se for PIX
-    if (isPix ) {
+    if (isPix) {
       paymentBody.payment_method_id = "pix"
     } 
     // ✅ Se for cartão
@@ -82,6 +82,17 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
     
   } catch (error) {
     console.error("Erro ao criar pagamento:", error)
+    throw error
+  }
+}
+
+// ✅ ADICIONAR FUNÇÃO getPaymentById (necessária para notification/route.ts)
+export const getPaymentById = async (paymentId: string) => {
+  try {
+    const result = await MercadoPago.payment.get(paymentId)
+    return result.body
+  } catch (error) {
+    console.error("Erro ao buscar pagamento:", error)
     throw error
   }
 }
