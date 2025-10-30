@@ -16,10 +16,15 @@ export const createPayment = async (
   cardFormData?: ICardPaymentFormData<ICardPaymentBrickPayer>
 ) => {
   try {
-    const { first_name, last_name, cpf, email, phone } = payment.summary_information as any
+    const { name, cpf, email, phone } = payment.summary_information as any
 
-    if (!first_name || !last_name || !cpf || !email)
-      throw new Error("Campos obrigatórios ausentes (first_name, last_name, cpf, email)")
+    if (!name || !cpf || !email)
+      throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
+
+    // separar first_name e last_name
+    const fullName = name.split(" ")
+    const first_name = fullName[0]
+    const last_name = fullName.slice(1).join(" ") || "-"
 
     const isPix = payment.method === "pix"
     const invoice = new Payment(client)
@@ -38,9 +43,9 @@ export const createPayment = async (
       statement_descriptor: "WBG"
     }
 
-    // Adiciona telefone se existir
+    // Adiciona telefone se existir (opcional)
     if (phone) {
-      const [area, number] = phone.split(" ")
+      const [area, number] = phone.replace(/\(|\)/g, "").split(" ")
       paymentBody.payer.phone = {
         area_code: area?.replace(/\D/g, "") || "",
         number: number?.replace(/\D/g, "") || ""
