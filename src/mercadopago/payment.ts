@@ -5,6 +5,7 @@ import { Database } from "@/supabase/database"
 import { updatePayment } from "@/supabase/admin"
 import { ICardPaymentBrickPayer, ICardPaymentFormData } from "@mercadopago/sdk-react/esm/bricks/cardPayment/type"
 
+// Timeout aumentado para 30s
 const client = new MercadoPagoConfig({
   accessToken: process.env.ACCESS_TOKEN!,
   options: { timeout: 30000 }
@@ -15,12 +16,10 @@ export const createPayment = async (
   cardFormData?: ICardPaymentFormData<ICardPaymentBrickPayer>
 ) => {
   try {
-    const { name, cpf, email, phone } = payment.summary_information as any
-    if (!name || !cpf || !email) throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
+    const { first_name, last_name, cpf, email, phone } = payment.summary_information as any
 
-    const fullName = name.split(" ")
-    const firstName = fullName[0] || ""
-    const lastName = fullName.slice(1).join(" ") || ""
+    if (!first_name || !last_name || !cpf || !email)
+      throw new Error("Campos obrigatórios ausentes (first_name, last_name, cpf, email)")
 
     const isPix = payment.method === "pix"
     const invoice = new Payment(client)
@@ -29,8 +28,8 @@ export const createPayment = async (
       transaction_amount: payment.total,
       description: "Pagamento WBG.",
       payer: {
-        first_name: firstName,
-        last_name: lastName,
+        first_name,
+        last_name,
         identification: { type: "CPF", number: cpf },
         email
       },
@@ -39,6 +38,7 @@ export const createPayment = async (
       statement_descriptor: "WBG"
     }
 
+    // Adiciona telefone se existir
     if (phone) {
       const [area, number] = phone.split(" ")
       paymentBody.payer.phone = {
@@ -51,6 +51,7 @@ export const createPayment = async (
       paymentBody.payment_method_id = "pix"
     } else if (cardFormData) {
       const { token, payment_method_id, issuer_id, installments, payer } = cardFormData
+
       if (!token || !payment_method_id || !issuer_id)
         throw new Error("Campos obrigatórios do cartão ausentes")
 
@@ -63,13 +64,11 @@ export const createPayment = async (
         paymentBody.payer = {
           ...paymentBody.payer,
           ...payer,
-          identification: payer.identification || paymentBody.payer.identification,
-          phone: payer.phone || paymentBody.payer.phone
+          identification: payer.identification || paymentBody.payer.identification
         }
       }
     } else {
-      console.warn("⚠️ Nenhum método de pagamento definido — ignorando criação")
-      return undefined
+      throw new Error("Dados de pagamento incompletos")
     }
 
     const { id, point_of_interaction } = await (
@@ -88,19 +87,17 @@ export const createPayment = async (
       : undefined
 
   } catch (error) {
-    console.error("❌ Erro ao criar pagamento:", error)
+    console.error("Erro ao criar pagamento:", error)
     throw error
   }
 }
 
-// ✅ Buscar pagamento por ID
 export const getPaymentById = async (paymentId: string) => {
   try {
     const invoice = new Payment(client)
-    const result = await invoice.get({ id: paymentId })
-    return result
+    return await invoice.get({ id: paymentId })
   } catch (error) {
-    console.error("❌ Erro ao buscar pagamento:", error)
+    console.error("Erro ao buscar pagamento:", error)
     throw error
   }
 }
