@@ -15,14 +15,12 @@ export const createPayment = async (
   cardFormData?: ICardPaymentFormData<ICardPaymentBrickPayer>
 ) => {
   try {
-    console.log("🧾 Criando pagamento Mercado Pago:", {
-      method: payment.method,
-      total: payment.total,
-      summary_information: payment.summary_information
-    })
-
     const { name, cpf, email, phone } = payment.summary_information as any
     if (!name || !cpf || !email) throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
+
+    const fullName = name.split(" ")
+    const firstName = fullName[0] || ""
+    const lastName = fullName.slice(1).join(" ") || ""
 
     const isPix = payment.method === "pix"
     const invoice = new Payment(client)
@@ -31,9 +29,10 @@ export const createPayment = async (
       transaction_amount: payment.total,
       description: "Pagamento WBG.",
       payer: {
-        email,
-        full_name: name || "", 
-        identification: { type: "CPF", number: cpf }
+        first_name: firstName,
+        last_name: lastName,
+        identification: { type: "CPF", number: cpf },
+        email
       },
       callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/callback`,
       notification_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/notification`,
@@ -52,7 +51,6 @@ export const createPayment = async (
       paymentBody.payment_method_id = "pix"
     } else if (cardFormData) {
       const { token, payment_method_id, issuer_id, installments, payer } = cardFormData
-
       if (!token || !payment_method_id || !issuer_id)
         throw new Error("Campos obrigatórios do cartão ausentes")
 
