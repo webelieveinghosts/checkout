@@ -1,6 +1,6 @@
 "use server"
 
-import { MercadoPagoConfig, Payment } from "@mercadopago"
+import { MercadoPagoConfig, Payment } from "mercadopago"
 import { Database } from "@/supabase/database"
 import { updatePayment } from "@/supabase/admin"
 import { ICardPaymentBrickPayer, ICardPaymentFormData } from "@mercadopago/sdk-react/esm/bricks/cardPayment/type"
