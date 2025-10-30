@@ -24,19 +24,16 @@ export const createPayment = async (
     const { name, cpf, email, phone } = payment.summary_information as any
     if (!name || !cpf || !email) throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
 
-    const fullName = name?.split(" ") ?? []
     const isPix = payment.method === "pix"
-
     const invoice = new Payment(client)
 
     const paymentBody: any = {
       transaction_amount: payment.total,
       description: "Pagamento WBG.",
       payer: {
-        first_name: fullName[0] || "",
-        last_name: fullName.slice(1).join(" ") || "",
-        identification: { type: "CPF", number: cpf },
-        email
+        email,
+        full_name: name || "", 
+        identification: { type: "CPF", number: cpf }
       },
       callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/callback`,
       notification_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/notification`,
@@ -101,10 +98,6 @@ export const createPayment = async (
 // ✅ Buscar pagamento por ID
 export const getPaymentById = async (paymentId: string) => {
   try {
-    const client = new MercadoPagoConfig({
-      accessToken: process.env.ACCESS_TOKEN!,
-      options: { timeout: 30000 }
-    })
     const invoice = new Payment(client)
     const result = await invoice.get({ id: paymentId })
     return result

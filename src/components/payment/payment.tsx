@@ -1,22 +1,26 @@
 "use client"
 
-import { ICardPaymentBrickPayer, ICardPaymentFormData } from "@mercadopago/sdk-react/esm/bricks/cardPayment/type"
+import { ICardPaymentFormData } from "@mercadopago/sdk-react/esm/bricks/cardPayment/type"
 import { Database } from "@/supabase/database"
 import { CardPayment, initMercadoPago } from "@mercadopago/sdk-react"
 import { createPayment } from "@/mercadopago/payment"
 
+// Inicializa Mercado Pago
 initMercadoPago("APP_USR-363935cd-0e0c-4b75-a0c9-a5cc6a9d2646", {
   locale: "pt-BR"
 })
 
 export const Payment = ({ payment }: { payment: Database["public"]["Tables"]["transactions"]["Row"] }) => {
 
-  const handleCardSubmit = async (cardFormData: ICardPaymentFormData<ICardPaymentBrickPayer>) => {
-    await createPayment(payment, cardFormData)
+  const handleCardSubmit = async (cardFormData: ICardPaymentFormData<any>) => {
+    try {
+      await createPayment(payment, cardFormData)
+    } catch (err) {
+      console.error("Erro ao processar pagamento:", err)
+    }
   }
 
   const { email, cpf, name, phone } = payment.summary_information as any
-
   const [ddd, numero] = phone?.split(" ") ?? ["", ""]
 
   return (
@@ -25,8 +29,7 @@ export const Payment = ({ payment }: { payment: Database["public"]["Tables"]["tr
         amount: payment.total,
         payer: {
           email,
-          first_name: name?.split(" ")[0] || "",
-          last_name: name?.split(" ").slice(1).join(" ") || "",
+          full_name: name || "", 
           identification: {
             type: "CPF",
             number: cpf
