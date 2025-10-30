@@ -22,6 +22,7 @@ export const createPayment = async (
       throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
 
     
+
     // separar first_name e last_name
     const fullName = name.split(" ")
     const first_name = fullName[0]
