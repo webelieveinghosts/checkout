@@ -1,21 +1,21 @@
 "use server"
 
-import { MercadoPagoConfig, Payment } from "mercadopago"
+import MercadoPago from "mercadopago"
 import { Database } from "@/supabase/database"
 import { updatePayment } from "@/supabase/admin"
 import { ICardPaymentBrickPayer, ICardPaymentFormData } from "@mercadopago/sdk-react/esm/bricks/cardPayment/type"
 
-// Aumentar timeout de 5000ms para 30000ms (30 segundos)
-const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN!, options: { timeout: 30000 } })
+// Configurar Mercado Pago
+MercadoPago.configure({
+  access_token: process.env.ACCESS_TOKEN!,
+})
 
 export const createPayment = async (payment: Database["public"]["Tables"]["transactions"]["Row"], cardFormData?: ICardPaymentFormData<ICardPaymentBrickPayer>) => {
   try {
     const { name, cpf, email, phone } = payment.summary_information as any
     const fullName = name.split(" ") as string[]
     
-    const invoice = new Payment(client)
-    
-    // ✅ CORREÇÃO: Verificar se é PIX primeiro
+    // ✅ Verificar se é PIX primeiro
     const isPix = payment.method === "pix"
     
     // Preparar body base
@@ -46,48 +46,38 @@ export const createPayment = async (payment: Database["public"]["Tables"]["trans
     } 
     // ✅ Se for cartão
     else if (cardFormData) {
-      // Validar se cardFormData tem as propriedades necessárias
-      if (!cardFormData.token) {
-        throw new Error("Token do cartão não encontrado")
-      }
+      if (!cardFormData.token) throw new Error("Token do cartão não encontrado")
+      if (!cardFormData.payment_method_id) throw new Error("Método de pagamento não encontrado")
+      if (!cardFormData.issuer_id) throw new Error("Issuer ID não encontrado")
       
-      if (!cardFormData.payment_method_id) {
-        throw new Error("Método de pagamento não encontrado")
-      }
-      
-      if (!cardFormData.issuer_id) {
-        throw new Error("Issuer ID não encontrado")
-      }
-      
-      // Adicionar informações do cartão
       paymentBody.payment_method_id = cardFormData.payment_method_id
       paymentBody.token = cardFormData.token
       paymentBody.issuer_id = cardFormData.issuer_id
       
-      // ✅ PARCELAMENTO: Limitar a no máximo 3 parcelas
+      // ✅ PARCELAMENTO: Limitar a 3x
       const requestedInstallments = cardFormData.installments || 1
       paymentBody.installments = Math.min(requestedInstallments, 3)
       
-      // Adicionar informações do pagador se disponível
       if (cardFormData.payer) {
-        paymentBody.payer = {
-          ...paymentBody.payer,
-          ...cardFormData.payer
-        }
+        paymentBody.payer = { ...paymentBody.payer, ...cardFormData.payer }
       }
     } else {
       throw new Error("Dados de pagamento incompletos")
     }
     
-    const { id, point_of_interaction } = await (payment.payment_id ?
-      invoice.get({ id: payment.payment_id }) :
-      invoice.create({ body: paymentBody }))
+    let result
+    if (payment.payment_id) {
+      result = await MercadoPago.payment.get(payment.payment_id)
+    } else {
+      result = await MercadoPago.payment.create(paymentBody)
+      await updatePayment(payment.id, result.body.id.toString())
+    }
     
-    if (!payment.payment_id) await updatePayment(payment.id, id!.toString())
+    const responseBody = result.body
     
     return isPix ? {
-      copyAndPaste: point_of_interaction!.transaction_data!.qr_code,
-      image: point_of_interaction!.transaction_data!.qr_code_base64
+      copyAndPaste: responseBody.point_of_interaction?.transaction_data?.qr_code,
+      image: responseBody.point_of_interaction?.transaction_data?.qr_code_base64
     } : undefined
     
   } catch (error) {
