@@ -45,7 +45,7 @@ export const createPayment = async (
       statement_descriptor: "WBG"
     }
 
-    // Adiciona telefone se existir (opcional)
+
     if (phone) {
       const [area, number] = phone.replace(/\(|\)/g, "").split(" ")
       paymentBody.payer.phone = {
