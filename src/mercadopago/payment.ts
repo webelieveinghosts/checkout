@@ -21,7 +21,7 @@ export const createPayment = async (
     if (!name || !cpf || !email)
       throw new Error("Campos obrigatórios ausentes (name, cpf, email)")
 
-    
+
 
     // separar first_name e last_name
     const fullName = name.split(" ")
@@ -41,7 +41,7 @@ export const createPayment = async (
         email
       },
       callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/callback`,
-      notification_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/notification`,
+      notification_url: "https://checkout.webelieveinghosts.com.br/notification",
       statement_descriptor: "WBG"
     }
 
@@ -97,9 +97,9 @@ export const createPayment = async (
 
     return isPix
       ? {
-          copyAndPaste: point_of_interaction?.transaction_data?.qr_code,
-          image: point_of_interaction?.transaction_data?.qr_code_base64
-        }
+        copyAndPaste: point_of_interaction?.transaction_data?.qr_code,
+        image: point_of_interaction?.transaction_data?.qr_code_base64
+      }
       : undefined
 
   } catch (error) {
