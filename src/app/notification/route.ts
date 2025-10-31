@@ -3,12 +3,38 @@ import { successPayment } from "@/supabase/admin"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
-    const searchParams = req.nextUrl.searchParams
-    if (searchParams.get("topic") !== "payment") return NextResponse.json({ message: "No valid topic." }, { status: 500 })
+    try {
+        console.log("🔔 [Webhook recebido] URL:", req.nextUrl.toString())
 
-    const info = await getPaymentById(searchParams.get("id")!)
-    if (!info || info.status != "approved") return NextResponse.json({ message: "No valid payment id." }, { status: 201 })
+        const searchParams = req.nextUrl.searchParams
+        const topic = searchParams.get("topic")
+        const paymentId = searchParams.get("id")
 
-    await successPayment(searchParams.get("id")!)
-    return Response.json({ message: "approved" }, { status: 200 })
+        console.log("📦 [Parâmetros recebidos]:", { topic, paymentId })
+
+        if (topic !== "payment") {
+            console.warn("⚠️ Tópico inválido:", topic)
+            return NextResponse.json({ message: "No valid topic." }, { status: 500 })
+        }
+
+        console.log("🔍 Buscando informações do pagamento no Mercado Pago...")
+        const info = await getPaymentById(paymentId!)
+
+        console.log("💳 [Dados do pagamento obtidos]:", info)
+        if (!info || info.status !== "approved") {
+            console.warn("🚫 Pagamento inválido ou ainda não aprovado:", info?.status)
+            return NextResponse.json({ message: "No valid payment id." }, { status: 201 })
+        }
+
+        console.log("✅ Pagamento aprovado! Atualizando status no Supabase...")
+
+        await successPayment(paymentId!)
+
+        console.log("📊 Status atualizado com sucesso no Supabase para ID:", paymentId)
+
+        return Response.json({ message: "approved" }, { status: 200 })
+    } catch (err) {
+        console.error("💥 Erro ao processar webhook:", err)
+        return NextResponse.json({ message: "Internal error." }, { status: 500 })
+    }
 }
