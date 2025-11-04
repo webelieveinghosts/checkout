@@ -20,7 +20,6 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
   if (!payment || payment.status !== "pending")
     return redirect("https://www.webelieveinghosts.com.br/")
 
-  // 🔹 Criação de pagamento PIX segura
   let paymentData = null
   if (payment.method === "pix") {
     if (!payment.total || !payment.summary_information) {
