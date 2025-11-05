@@ -7,7 +7,7 @@ export default async function SuccessPage({ params }: { params: Promise<{ id: st
     const payment = await getPaymentById(id)
 
     if (!payment)
-        return redirect("https://www.webelieveinghosts.com.br/")
+        return redirect("https://wbg.wtf/")
 
     if (payment.status != "paid")
         return redirect(`/${id}/payment`)
@@ -28,7 +28,7 @@ export default async function SuccessPage({ params }: { params: Promise<{ id: st
                         <p className="text-gray-600 my-2">Obrigado por concluir seu pagamento online com segurança.</p>
                         <p> Tenha um ótimo dia! </p>
                         <div className="py-10 text-center">
-                            <a href="https://www.webelieveinghosts.com.br/" className="px-12 bg-primary hover:bg-primary-hover text-white font-semibold py-3 transition-all duration-500">
+                            <a href="https://wbg.wtf/" className="px-12 bg-primary hover:bg-primary-hover text-white font-semibold py-3 transition-all duration-500">
                                 VOLTAR A LOJA
                             </a>
                         </div>
