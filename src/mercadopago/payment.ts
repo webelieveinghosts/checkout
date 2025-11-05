@@ -40,8 +40,8 @@ export const createPayment = async (
         identification: { type: "CPF", number: cpf },
         email
       },
-      callback_url: `https://checkout.webelieveinghosts.com.br/${payment.id}/callback`,
-      notification_url: "https://checkout.webelieveinghosts.com.br/notification",
+      callback_url: `https://checkout.wbg.wtf/${payment.id}/callback`,
+      notification_url: "https://checkout.wbg.wtf/notification",
       statement_descriptor: "WBG"
     }
 
