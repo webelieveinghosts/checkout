@@ -11,7 +11,7 @@ export default async function Home({ params }: { params: Promise<{ id: string }>
     const cart = await getCart(id)
 
     if (!cart || cart.length === 0)
-        return redirect("https://www.webelieveinghosts.com.br/")
+        return redirect("https://wbg.wtf/")
 
     return (
         <CheckoutProvider items={cart}>
