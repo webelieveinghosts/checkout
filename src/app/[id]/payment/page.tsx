@@ -18,7 +18,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ id: st
   const payment = await getPaymentById(id)
 
   if (!payment || payment.status !== "pending")
-    return redirect("https://www.webelieveinghosts.com.br/")
+    return redirect("https://wbg.wtf/")
 
   let paymentData = null
   if (payment.method === "pix") {
